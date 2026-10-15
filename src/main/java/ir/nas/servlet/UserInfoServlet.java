@@ -1,6 +1,7 @@
 package ir.nas.servlet;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,21 +16,30 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "userInfoServlet", value = "/userInfoServlet")
-public class UserInfoServlet extends HttpServlet
-{
-    private UserInfoService uService = new UserInfoService(new UserInfoRepository());
-    private ObjectMapper objectMapper = new ObjectMapper();
+@WebServlet(name = "userInfoServlet", value = {"/userinfo/*", "/userinfos"})
+public class UserInfoServlet extends HttpServlet {
+    private final UserInfoService uService = new UserInfoService(new UserInfoRepository());
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-    {
-        resp.getWriter().println("Greeting!");
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String pathInfo = req.getPathInfo();
+
+        if (Optional.ofNullable(pathInfo).isEmpty() || pathInfo.equals("/")) {
+            this.objectMapper.writeValue(resp.getWriter(), this.uService.findAll());
+        } else {
+            Long id = Long.parseLong(pathInfo.substring(1));
+            Optional<UserInfoResponseDTO> userInfoResponseDTO = this.uService.findById(id);
+            if (userInfoResponseDTO.isPresent()) {
+                this.objectMapper.writeValue(resp.getWriter(), userInfoResponseDTO.get());
+            } else {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Couldn't find user with id: " + id);
+            }
+        }
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-    {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (!"application/json".equalsIgnoreCase(req.getContentType())) {
             resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Content Type must be application/json");
             return;

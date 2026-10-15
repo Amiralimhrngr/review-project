@@ -1,4 +1,4 @@
-POST http://0.0.0.0:8080/userInfoServlet
+POST http://localhost:8080/review_project_war/userinfo
 Content-Type: application/json
 
 {
@@ -7,3 +7,20 @@ Content-Type: application/json
     "age": 34,
     "name": "John Doe"
 }
+
+###
+
+#Without / at the end of URL
+GET http://localhost:8080/review_project_war/userinfo
+Content-Type: application/json
+
+###
+
+#With / at the end of URL
+GET http://localhost:8080/review_project_war/userinfo/
+Content-Type: application/json
+
+###
+
+GET http://localhost:8080/review_project_war/userinfo/1
+Content-Type: application/json
