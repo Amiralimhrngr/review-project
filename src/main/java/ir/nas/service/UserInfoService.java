@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 public class UserInfoService
 {
@@ -23,7 +25,16 @@ public class UserInfoService
         return UserInfoDaoToUserInfoResponseDto.convert(userInfoDAO);
     }
 
-
+    public Optional<UserInfoResponseDTO> findById(Long id) {
+        Optional<UserInfoDAO> userInfoDAOOptional = this.repository.findById(id);
+        UserInfoDAO userInfoDAO;
+        if (userInfoDAOOptional.isPresent()) {
+            userInfoDAO = userInfoDAOOptional.get();
+            return Optional.of(UserInfoDaoToUserInfoResponseDto.convert(userInfoDAO));
+        } else {
+            return Optional.empty();
+        }
+    }
 
     public List<UserInfoResponseDTO> findAll() {
         return this.repository.findAll()
